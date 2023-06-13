@@ -1,0 +1,10 @@
+name: visualize_power
+account: csu-statistics
+server: shinyapps.io
+appId: 301877
+bundleId: 1279133
+url: https://csu-statistics.shinyapps.io/visualize_power/
+when: 1521575409.09502
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: p-val dist.R
