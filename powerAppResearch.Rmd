@@ -1,0 +1,51 @@
+---
+title: "powerAppResearch"
+author: "Damyenn Cardenas"
+date: "2023-06-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Testing Structure
+
+The way items will be getting tested is
+
+-   speed using 'profvis'
+-   time between idles using 'reactlog' and 'profvis'
+
+# Organization of Data
+
+I will be organizing data into different levels. Each of these levels will be based on how much time and speed was changed for each individual change.
+
+### Branch defaultWRLog
+
+This branch is a first look at what **reactlog** can provide and how I plan to write and take information moving forward
+
+First attempt is a Markdown table writing down time each plot renders and when the app first enter idle (When it loads for the user)
+
+-   **Side note:** CPU scheduling information is perfect for describing and organizing data
+
+-   Arrival Time: Time the process arrives in ready queue
+
+-   Completion Time: Time process completes its execution
+
+-   Burst Time: Time required by a plot to finish **Might not work for this organization**
+
+-   Turn around time: How long to perform that process *(difference between completion and arrival time)*
+
+-   Waiting Time: Time spend in the waiting process *(difference turn around time and burst time)* **Might not work for this organization**
+
+| Plot  | Arrival Time | Completion Time | Turn Around Time | Waiting Time | Connections |
+|------------|------------|------------|------------|------------|------------|
+| Pdist | 0s           | 0.3246s         | 0.3246s          |              | 7           |
+| Cohen | 0.3254s      | 0.3571s         | 0.0317s           |              | 7           |
+| Tdist | 0.3576s      | 0.3910s         | 0.0334s          |              | 7           |
+| First Idle Position | 0 | 0.3915s | 0.3915s | | |
+
+
+
+
+
