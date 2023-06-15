@@ -35,5 +35,6 @@ shinyUI(fluidPage(
 
 ))
 
+reactlogShow()
 
-shiny::reactlogShow()
+reactlogReset()
