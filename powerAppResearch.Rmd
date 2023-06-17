@@ -38,14 +38,107 @@ First attempt is a Markdown table writing down time each plot renders and when t
 
 -   Waiting Time: Time spend in the waiting process *(difference turn around time and burst time)* **Might not work for this organization**
 
-| Plot  | Arrival Time | Completion Time | Turn Around Time | Waiting Time | Connections |
+```{r}
+library(shiny)
+library(reactlog)
+
+reactlog_enable()
+
+runApp("powerApp")
+
+reactlogShow()
+
+reactlogReset()
+
+```
+
+| Plot                | Arrival Time | Completion Time | Turn Around Time | Waiting Time | Connections |
 |------------|------------|------------|------------|------------|------------|
-| Pdist | 0s           | 0.3246s         | 0.3246s          |              | 7           |
-| Cohen | 0.3254s      | 0.3571s         | 0.0317s           |              | 7           |
-| Tdist | 0.3576s      | 0.3910s         | 0.0334s          |              | 7           |
-| First Idle Position | 0 | 0.3915s | 0.3915s | | |
+| Pdist               | 0s           | 0.3246s         | 0.3246s          |              | 7           |
+| Cohen               | 0.3254s      | 0.3571s         | 0.0317s          |              | 7           |
+| Tdist               | 0.3576s      | 0.3910s         | 0.0334s          |              | 7           |
+| First Idle Position | 0s           | 0.3915s         | 0.3915s          |              |             |
 
+```{r}
+library(shiny)
+library(profvis)
 
+profvis({
+  runApp("powerApp")
+})
 
+```
 
+Second attempt is using a new package called profvis. This tool is used for profiling and will be the direction I go moving forward
 
+**You can rename the extension of the saved profiling files into html files. This can be helpful when it comes to presentation and just general info**
+
+| Plot        | Arrival Time | Completion Time | Turn Around Time |
+|-------------|--------------|-----------------|------------------|
+| Pdist       | 300ms        | 490ms           | 180ms            |
+| Cohen       | 520ms        | 530ms           | 10ms             |
+| Tdist       | 540ms        | 550ms           | 10ms             |
+| First Idle? | 0ms          | 550ms           | 550ms            |
+
+| Plot        | Arrival Time | Completion Time | Turn Around Time |
+|-------------|--------------|-----------------|------------------|
+| Pdist       | 300ms        | 510ms           | 200ms            |
+| Cohen       | 520ms        | 530ms           | 10ms             |
+| Tdist       | 530ms        | 560ms           | 30ms             |
+| First Idle? | 0ms          | 560ms           | 560ms            |
+
+| Plot        | Arrival Time | Completion Time | Turn Around Time |
+|-------------|--------------|-----------------|------------------|
+| Pdist       | 300ms        | 490ms           | 190ms            |
+| Cohen       | 500ms        | 510ms           | 10ms             |
+| Tdist       | 520ms        | 530ms           | 10ms             |
+| First Idle? | 0ms          | 550ms           | 550ms            |
+
+These tables show the app starting without any changes and without any interaction. As you can see the Pdist plot takes the longest as the others already done very quickly
+
+Now I am going to mess with the different sliders to see what changes with each one. Which graph updates and how long it takes.
+
+The first slider is: **Cohen's D**
+
+```{r}
+library(shiny)
+library(profvis)
+
+profvis({
+  runApp("powerApp")
+})
+
+```
+
+| Plot        | Arrival Time | Completion Time | Turn Around Time |
+|-------------|--------------|-----------------|------------------|
+| 1st Pdist   | 310ms        | 560ms           | 240ms            |
+| 1st Cohen   | 570ms        | 580ms           | 10ms             |
+| 1st Tdist   | 590ms        | 600ms           | 10ms             |
+| 2st Pdist   | 1660ms       | 1880ms          | 240ms            |
+| 2st Cohen   | 0ms          | 0ms             | 0ms              |
+| 2st Tdist   | 1900ms       | 1920ms          | 20ms             |
+| First Idle  | 0ms          | 600ms           | 600ms            |
+| Second Idle | 1650ms       | 1920ms          | 270ms            |
+
+| Plot        | Arrival Time | Completion Time | Turn Around Time |
+|-------------|--------------|-----------------|------------------|
+| 1st Pdist   |              |                 |                  |
+| 1st Cohen   |              |                 |                  |
+| 1st Tdist   |              |                 |                  |
+| 2st Pdist   |              |                 |                  |
+| 2st Cohen   |              |                 |                  |
+| 2st Tdist   |              |                 |                  |
+| First Idle  |              |                 |                  |
+| Second Idle |              |                 |                  |
+
+| Plot        | Arrival Time | Completion Time | Turn Around Time |
+|-------------|--------------|-----------------|------------------|
+| 1st Pdist   |              |                 |                  |
+| 1st Cohen   |              |                 |                  |
+| 1st Tdist   |              |                 |                  |
+| 2st Pdist   |              |                 |                  |
+| 2st Cohen   |              |                 |                  |
+| 2st Tdist   |              |                 |                  |
+| First Idle  |              |                 |                  |
+| Second Idle |              |                 |                  |
