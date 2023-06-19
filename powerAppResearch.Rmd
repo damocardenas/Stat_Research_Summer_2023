@@ -44,13 +44,14 @@ library(reactlog)
 
 reactlog_enable()
 
-runApp("powerApp")
-
 reactlogShow()
 
 reactlogReset()
 
+runApp("powerApp")
+
 ```
+
 
 | Plot                | Arrival Time | Completion Time | Turn Around Time | Waiting Time | Connections |
 |------------|------------|------------|------------|------------|------------|
@@ -142,3 +143,88 @@ profvis({
 | 2st Tdist   |              |                 |                  |
 | First Idle  |              |                 |                  |
 | Second Idle |              |                 |                  |
+
+Trying to Optimize and figure out a way to make reactlog import or show data without having to put numbers in.
+
+
+```{r}
+library(shiny)
+library(reactlog)
+
+reactlog_enable()
+
+react <- reactlog()
+reactlogShow()
+
+reactlogReset()
+
+runApp("powerApp")
+
+```
+
+```{r}
+#This seems to be like the way to get time differences or time in general for the reactlog
+react[[1]]
+print("--------------------")
+react[[114]]
+
+minTime <- react[[1]]$time
+maxTime <- react[[114]]$time
+
+time3 <- (react[[3]]$time - minTime) * 1000
+time3
+
+time4 <- (react[[4]]$time - minTime) * 1000
+time4
+
+
+```
+
+Figured out how to get the time from the reactlog data. Still do not know the difference between the different labels, reactid, action, etc.
+
+Going to try Profvis for bit due to finding documentation that seems promising.
+
+```{r}
+library(shiny)
+library(profvis)
+
+profvis({
+  runApp("powerApp")
+})
+
+```
+
+```{r}
+library(profvis)
+
+parse_rprof("Profiling/Default/first profile.Rprofvis")
+
+```
+
+```{r}
+library(profvis)
+
+saveProfvis <- profvis({
+  runApp("powerApp")
+})
+
+```
+
+```{r}
+saveProfvis
+
+saveProfvis[1]
+
+```
+
+In this dataframe you can create from profvis by saving it and indexing into the first element. You can see all the different labels and calls, times and depth
+
+If you look at the profile1 file. You will see .Call runs until 140ms
+
+If you look at the .Call in the dataframe it goes until 14 in the time column.
+
+This could be connected and might lead me to choosing profvis for writting and organizing data
+
+Another note is that the depth and call stack starts from the top of the stack downward. The time stays the same until the next elements after the depth reaches 1.
+
+
