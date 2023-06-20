@@ -52,7 +52,6 @@ runApp("powerApp")
 
 ```
 
-
 | Plot                | Arrival Time | Completion Time | Turn Around Time | Waiting Time | Connections |
 |------------|------------|------------|------------|------------|------------|
 | Pdist               | 0s           | 0.3246s         | 0.3246s          |              | 7           |
@@ -74,6 +73,8 @@ Second attempt is using a new package called profvis. This tool is used for prof
 
 **You can rename the extension of the saved profiling files into html files. This can be helpful when it comes to presentation and just general info**
 
+#### First Profile
+
 | Plot        | Arrival Time | Completion Time | Turn Around Time |
 |-------------|--------------|-----------------|------------------|
 | Pdist       | 300ms        | 490ms           | 180ms            |
@@ -81,12 +82,16 @@ Second attempt is using a new package called profvis. This tool is used for prof
 | Tdist       | 540ms        | 550ms           | 10ms             |
 | First Idle? | 0ms          | 550ms           | 550ms            |
 
+#### Second Profile
+
 | Plot        | Arrival Time | Completion Time | Turn Around Time |
 |-------------|--------------|-----------------|------------------|
 | Pdist       | 300ms        | 510ms           | 200ms            |
 | Cohen       | 520ms        | 530ms           | 10ms             |
 | Tdist       | 530ms        | 560ms           | 30ms             |
 | First Idle? | 0ms          | 560ms           | 560ms            |
+
+#### Third Profile
 
 | Plot        | Arrival Time | Completion Time | Turn Around Time |
 |-------------|--------------|-----------------|------------------|
@@ -111,6 +116,8 @@ profvis({
 
 ```
 
+#### Cohen's D First Profile
+
 | Plot        | Arrival Time | Completion Time | Turn Around Time |
 |-------------|--------------|-----------------|------------------|
 | 1st Pdist   | 310ms        | 560ms           | 240ms            |
@@ -122,6 +129,8 @@ profvis({
 | First Idle  | 0ms          | 600ms           | 600ms            |
 | Second Idle | 1650ms       | 1920ms          | 270ms            |
 
+#### Cohen's D Second Profile
+
 | Plot        | Arrival Time | Completion Time | Turn Around Time |
 |-------------|--------------|-----------------|------------------|
 | 1st Pdist   |              |                 |                  |
@@ -132,6 +141,8 @@ profvis({
 | 2st Tdist   |              |                 |                  |
 | First Idle  |              |                 |                  |
 | Second Idle |              |                 |                  |
+
+#### Cohen's D Third Profile
 
 | Plot        | Arrival Time | Completion Time | Turn Around Time |
 |-------------|--------------|-----------------|------------------|
@@ -145,7 +156,6 @@ profvis({
 | Second Idle |              |                 |                  |
 
 Trying to Optimize and figure out a way to make reactlog import or show data without having to put numbers in.
-
 
 ```{r}
 library(shiny)
@@ -213,18 +223,139 @@ saveProfvis <- profvis({
 ```{r}
 saveProfvis
 
-saveProfvis[1]
+saveProfvis$x
 
 ```
 
-In this dataframe you can create from profvis by saving it and indexing into the first element. You can see all the different labels and calls, times and depth
+In this dataframe you can create from profvis by saving it and indexing into the first element or grabbing x. You can see all the different labels and calls, times and depth
 
 If you look at the profile1 file. You will see .Call runs until 140ms
 
 If you look at the .Call in the dataframe it goes until 14 in the time column.
 
-This could be connected and might lead me to choosing profvis for writting and organizing data
+This could be connected and might lead me to choosing profvis for writing and organizing data
 
 Another note is that the depth and call stack starts from the top of the stack downward. The time stays the same until the next elements after the depth reaches 1.
+
+```{r}
+saveProfvis$width
+
+saveProfvis$height
+
+saveProfvis$sizingPolicy
+
+saveProfvis$dependencies
+
+saveProfvis$elementId
+
+saveProfvis$preRenderHook
+
+saveProfvis$jsHooks
+
+saveProfvis$jsHooks[0]
+
+```
+
+Only the x element from the dataframe profvis is useful as it tells the time and details about the actual profiling
+
+```{r}
+library(shiny)
+library(profvis)
+
+saveProfvis <- profvis({
+  runApp("powerApp")
+})
+
+saveProfvis
+
+cleanProfvis <- saveProfvis$x
+cleanProfvis
+
+```
+
+Not all the timing between labels are as clean as the one previously mentioned.
+
+.Call in this one starts at time 3 but in the profile it is at 20ms?
+
+Time could be done by 10 ms steps for each number in time and starts at 0ms for time = 1?
+
+Another note is that the time jumps when nothing is going on. On row 892 and 893. The time jumps from 159 to 186 because there is nothing going on during those times I believe.
+
+.External on line 708 and at time 50 lines up with the profile with 500ms being where .External is placed on the flame graph
+
+.External on line 771 has time of 53
+
+.Call on line 795 has time of 55 and I believe lines up with the 560ms .Call in Flame graph
+
+The sys.nframe call on line 826 has time of 89 but there is no marking of this call in the flame graph?
+
+There is a sys.nframe at 1660ms mark in the flame graph but this does not line up with the call in the dataframe
+
+Also the labels and time do not end the same with the flame graph. The flame graph has a time and calls around the 3000ms mark and the time for the data frame ends at 205, which should be around 2040 ms, (I believe)
+
+This can mean that the data frame is hiding information from me due to being that big or the data frame does not capture all the information from the profiling
+
+```{r}
+library(shiny)
+library(profvis)
+
+saveProfvis2 <- profvis({
+  runApp("powerApp")
+})
+
+saveProfvis2
+
+saveProfvis2$x$message$prof[900:1065,]
+
+cleanProfvis2 <- saveProfvis2$x$message$prof
+cleanProfvis2[0:901,]
+
+```
+
+These extra rows in the save data frame od end up creating the full flame graph. This means that once I find out how to calculate the time for the dataframe, that these data frames can be used as my markdown tables that I have been creating previously.
+
+Also the .Call label at 915 and time 62 should be accurate if the the time column starts with 0ms = 1 time and going by 10ms
+
+If this is correct, the way to get a ms time for the flame graph is by subtracting 1 from the time and multiplying by 10. `(time - 1) \* 10`
+
+Then to go from the flame graph time back to the data frame should be `(time / 10) + 1`
+
+```{r}
+
+saveProfvis2
+
+cleanProfvis2
+
+#Testing that 580ms in the flame graph equals 59 time in the dataframe
+
+cleanProfvis2[cleanProfvis2$time == 59,]
+
+#This should have the same call stack and should show that the equations I said eariler are correct.
+
+```
+
+This test shows how the time works between the flame graph and the prfile that Profvis builds after each shiny app
+
+This now allows me to take the labels that I want like the the different graph and plot names and grabbing their time and converting that into ms and puttting this all into a table to see the speed up change
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
